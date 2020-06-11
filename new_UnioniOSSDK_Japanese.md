@@ -1,7 +1,7 @@
 # Pangle iOS SDK の導入マニュアル
 
 - [Pangle iOS SDK の導入マニュアル](#integrate-manual)
-    - [インストールガイド](#install-guide)
+    - [インストールガイド](#integrate-manual)
         - [SDKのインストール](#install)
             - [動作環境](#envir)
             - [CocoaPods](#cocoapods)
@@ -37,11 +37,11 @@
 <a name="integrate-manual"></a>
 ## インストールガイド
 
-<a name="install-guide"></a>
+<a name="install"></a>
 ### SDKのインストール
 
 <a name="envir"></a>
-### 動作環境
+#### 動作環境
 SDKをアプリにインストールするには、
 + iOS 9.X 以上をターゲットに設定していること
 + Xcode 10.0 以降を使用していること
