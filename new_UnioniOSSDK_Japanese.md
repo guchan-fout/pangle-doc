@@ -15,27 +15,30 @@
         - [SDKの初期化](#buadsdkmanager)
             - [BUAdSDKManagerでのSDK初期化](#buadsdkmanager-use)
             - [インターフェイスの説明](#buadsdkmanager-if)
-        - [2.2 リワード動画(BURewardedVideoAd)](#22-リワード動画burewardedvideoad)
-            - [2.2.1 BURewardedVideoAdインターフェイスの説明](#221-burewardedvideoadインターフェイスの説明)
-            - [2.2.2 BURewardedVideoAdコールバックの説明](#222-burewardedvideoadコールバックの説明)
-            - [2.2.3 インスタンス](#223-インスタンス)
-            - [2.2.4 BURewardedVideoModel](#224-burewardedvideomodel)
-            - [2.2.5 サーバからサーバへのコールバック](#225-サーバからサーバへのコールバック)
-                - [コールバック方法の説明](#コールバック方法の説明)
-                - [サイン作成方法](#サイン作成方法)
-                - [規約に戻る](#規約に戻る)
-            - [2.2.6 AdMobがCustomEvent Adapterの方法でリワード動画を統合する](#226-admobがcustomevent-adapterの方法でリワード動画を統合する)
-        - [2.3 フルスクリーン動画(BUFullscreenVideoAd)](#23-フルスクリーン動画bufullscreenvideoad)
-            - [2.3.1 BUFullscreenVideoAdインターフェイスの説明](#231-bufullscreenvideoadインターフェイスの説明)
-            - [2.3.2 BUFullscreenVideoAdコールバックの説明](#232-bufullscreenvideoadコールバックの説明)
-            - [2.3.3 インスタンス](#233-インスタンス)
-    - [付録](#付録)
-        - [SDKエラーコード](#sdkエラーコード)
+        - [リワード動画(BURewardedVideoAd)](#burewardedvideoad)
+            - [BURewardedVideoAdインターフェイスの説明](#burewardedvideoad-if)
+            - [BURewardedVideoAdコールバックの説明](#burewardedvideoad-callback)
+            - [リワード動画の初期化とロード](#burewardedvideoad-instance)
+            - [BURewardedVideoModel](#burewardedvideo-model)
+            - [サーバー間の検証コールバック](#server-callback)
+                - [コールバック方法の説明](#callback-manual)
+                - [サイン作成方法](#sign)
+                - [レスポンス](#response)
+            - [PangleのAdmobメディエーション](#admob)
+        - [フルスクリーン動画(BUFullscreenVideoAd)](#bufullscreenvideoad)
+            - [BUFullscreenVideoAdインターフェイスの説明](#bufullscreenvideoad-if)
+            - [BUFullscreenVideoAdコールバックの説明](#bufullscreenvideoad-callback)
+            - [フルスクリーン動画の初期化とロード](#bufullscreenvideoad-instance)
+    - [付録](#appendix)
+        - [SDKエラーコード](#sdk-error)
         - [FAQ](#faq)
 
 
 <a name="integrate-manual"></a>
 ## インストールガイド
+
+<a name="install-guide"></a>
+### SDKのインストール
 
 <a name="envir"></a>
 ### 動作環境
@@ -43,9 +46,6 @@ SDKをアプリにインストールするには、
 + iOS 9.X 以上をターゲットに設定していること
 + Xcode 10.0 以降を使用していること
 + 対応アーキテクチャ：i386, x86-64, armv7, armv7s, arm64
-
-<a name="1-install"></a>
-### SDKのインストール
 
 <a name="cocoapods"></a>
 #### CocoaPods
@@ -62,15 +62,15 @@ pod方式の接続について更に詳しくお知りになりたい方は[GitH
 
 <a name="manual-install"></a>
 #### 手動インストール
-Pangle管理画面からダウンロードしたSDKのzipファイルを解凍後に、FrameworksフォルダにあるBUAdSDK.framework, BUFoundation.framework, BUAdSDK.bundleをプロジェクトにドラッグ&ドロップすれば完了です。
+Pangle管理画面からダウンロードしたSDKのzipファイルを解凍後に、Frameworksフォルダにある`BUAdSDK.framework`, `BUFoundation.framework`, `BUAdSDK.bundle`をプロジェクトにドラッグ&ドロップすれば完了です。
 
-*SDKをアップデートする際に、BUAdSDK.framework, BUFoundation.framework, BUAdSDK.bundleとも更新してください。*
+*SDKをアップデートする際に、`BUAdSDK.framework`, `BUFoundation.framework`, `BUAdSDK.bundle`とも更新してください。*
 
 ドラッグ&ドロップするときは、以下の方法で選択してください。
 
 ![image](http://sf1-ttcdn-tos.pstatp.com/img/union-platform/9537cbbf7a663781539ae6b07f2e646b.png~0x0_q100.webp)
 
-ドラッグ&ドロップ完了後は、Copy Bundle ResourcesにBUAdSDK.bundleが含まれていることを確認してください。含まれていないと、アイコン画像をロードできないことがあります。
+ドラッグ&ドロップ完了後は、Copy Bundle Resourcesに`BUAdSDK.bundle`が含まれていることを確認してください。含まれていないと、アイコン画像をロードできないことがあります。
 
 ![image](http://sf1-ttcdn-tos.pstatp.com/img/union-platform/f20b43b4fbed075820aa738ea1416bd4.png~0x0_q100.webp)
 
@@ -134,19 +134,16 @@ Pangleの管理画面にAppIDとPlacementIDを作成してください。ご不�
 <a name="ads-setting"></a>
 ## 広告の実装
 
-- [SDKの初期化](#buadsdkmanager)
-    - [BUAdSDKManagerでのSDK初期化](#buadsdkmanager-use)
-    - [インターフェイスの説明](#buadsdkmanager-if)
-
 <a name="buadsdkmanager"></a>
 ### SDKの初期化
-BUAdSDKManagerはSDKの初期化、およびグローバル情報の設定などの機能を提供するクラス。
+`BUAdSDKManager`はSDKの初期化、およびグローバル情報の設定などの機能を提供するクラスです。
 
 <a name="buadsdkmanager-use"></a>
 #### 初期化
 広告を取得する前に SDK を初期化する必要があります。
 
-その時にAppIDを入れる必要があります。
+その時にAppIDを入れる必要があります。まだ取得していない場合は、
+[AppIDとSlotIDを作成する](#appid-slotid)を参考ください。
 
 特別な理由が無い限り、アプリの起動時に行ってください。
 
@@ -198,13 +195,17 @@ BUAdSDKManagerはSDKの初期化、およびグローバル情報の設定など
 ```
 
 
-使用方法について更に詳しくお知りになりたい方はSDK Demoプロジェクトをご参照ください。
+使用方法について更に詳しくお知りになりたい方は、[GitHub上のDemoプロジェクト](https://github.com/bytedance/Bytedance-UnionAD) をご参照ください。
 
 
-### 2.2 リワード動画(BURewardedVideoAd)
-+ **タイプ説明：**動画リワード広告は斬新な広告形式です。ユーザは動画広告を見ることで報酬を手に入れることができます。例えば、仮想通貨、アプリ内グッズや自社のコンテンツ等です。このような広告の長さは15～30秒で、スキップできません。また、広告の終了画面には終了と表示され、ユーザの次の操作へ誘導します。
-#### 2.2.1 BURewardedVideoAdインターフェイスの説明
-**毎回新たにBURewardedVideoAdオブジェクトを生成し、loadAdDataを呼び出す方法で最新のリワード動画をリクエストする必要があります。繰り返しローカルキャッシュを使用して、何度もリワード動画を展示することはおやめください。**
+<a name="burewardedvideoad"></a>
+### リワード動画(BURewardedVideoAd)
+動画リワード広告は、ユーザが動画広告を見ることでアプリ内で使用可能な報酬を手に入れる広告形式です。広告の長さは15～30秒で、スキップできません。また、広告の終了画面にてユーザを次の操作へ誘導することが可能です。
+
+
+<a name="burewardedvideoad-if"></a>
+#### BURewardedVideoAdインターフェイスの説明
+
 
 ```Objective-C
 @interface BURewardedVideoAd : NSObject
@@ -225,7 +226,8 @@ Repeated display is not billed.
 @end
 ```
 
-#### 2.2.2 BURewardedVideoAdコールバックの説明
+<a name="burewardedvideoad-callback"></a>
+#### BURewardedVideoAdコールバックの説明
 ```Objective-C
 @protocol BURewardedVideoAdDelegate <NSObject>
 
@@ -297,7 +299,12 @@ This method is called when the user clicked skip button.
 @end
 
 ```
-#### 2.2.3 インスタンス
+
+<a name="burewardedvideoad-instance"></a>
+#### リワード動画のロード
+
+**毎回新たに`BURewardedVideoAd`オブジェクトを生成し、`loadAdData`を呼び出す方法で新しいリワード動画をリクエストする必要があります。リワード広告を一度表示すると、そのオブジェクトを繰り返して使用しないようにご注意ください。**
+
 
 ```Objective-C
 BURewardedVideoModel *model = [[BURewardedVideoModel alloc] init];
@@ -306,7 +313,9 @@ self.rewardedVideoAd = [[BURewardedVideoAd alloc] initWithSlotID:self.viewModel.
 self.rewardedVideoAd.delegate = self;
 [self.rewardedVideoAd loadAdData];
 ```
-#### 2.2.4 BURewardedVideoModel
+
+<a name="burewardedvideoad-model"></a>
+#### BURewardedVideoModel
 
 ```Objective-C
 @interface BURewardedVideoModel : NSObject
@@ -334,27 +343,30 @@ Only the string can be passed in this case, not nil.
 
 ```
 
-#### 2.2.5 サーバからサーバへのコールバック
-サーバからサーバへのコールバックにより、リワード広告を見るユーザに報酬を提供するか否かを判定できます。ユーザが広告を最後まで見た場合は、ToutiaoのメディアプラットフォームでToutiaoサーバからお客様自身のサーバへコールバックURLを割り当て、ユーザの操作完了を伝えることができます。
+<a name="server-callback"></a>
+#### サーバー間の検証コールバック
+サーバ間のコールバックにより、リワード広告を見るユーザに報酬を提供するか否かを判定できます。ユーザが広告を最後まで見た場合は、Pangleサーバからお客様自身のサーバへコールバックURLを割り当て、ユーザの操作完了を伝えることができます。
 
+<a name="callback-manual"></a>
 ##### コールバック方法の説明
-ToutiaoのサーバはGET方式で第三者のサービスのコールバックURLをリクエストし、以下のパラメータを返します。
+PangleのサーバはGET方式で第三者のサービスのコールバックURLをリクエストし、以下のパラメータを返します。
 user_id=%s&trans_id=%s&reward_name=%s&reward_amount=%d&extra=%s&sign=%s
 
 
 |フィールドの定義  |  フィールド名  |  フィールドタイプ  |  注釈 |
 | --- | --- | --- | --- |
 |sign   | サイン  |  string  |  サイン |
-|user_id   | ユーザid  |  string |   SDKパススルーを呼び出し、アプリケーション側がユーザを識別唯一のもの|
+|user_id   | ユーザid  |  string |   SDKから設定され、アプリケーション側がユーザを識別ためのID|
 |trans_id  |  取引id  |  string |   最後まで見た場合の唯一の取引ID|
-|reward_amount   | リワード数 |   int  |  TikTok Audience Networkから割り当てられるかSDKを呼び出して入れる|
-|reward_name  |  リワード名  |  string  |  TikTok Audience Networkから割り当てられるかSDKを呼び出して入れる|
-|extra  |  Extra  |  string   | SDKを呼び出して入れ、パススルーします。必要ない場合はヌルになります。|
+|reward_amount   | リワード数 |   int  |  Pangleから割り当てられるかSDKから設定される|
+|reward_name  |  リワード名  |  string  |  Pangleから割り当てられるかSDKから設定される|
+|extra  |  Extra  |  string   | SDKから設定される。必要ない場合は`null`|
 
+<a name="sign"></a>
 ##### サイン作成方法
-appSecurityKey: TikTok Audience Networkのリワード動画コードビットの作成で取得したキーtransId：取引id sign = sha256(appSecurityKey:transId)
+appSecurityKey: Pangleでのリワード動画の作成で生成されたtransId：取引id sign = sha256(appSecurityKey:transId)
 
-Pythonを例にする場合：
+Pythonの例：
 
 ```python
 import hashlib
@@ -366,37 +378,38 @@ check_sign_raw = "%s:%s" % (app_security_key, trans_id)
 sign = hashlib.sha256(check_sign_raw).hexdigest()
 ```
 
-##### 規約に戻る
-jsonデータをレスポンスします。フィールドは以下の通り。
+<a name="response"></a>
+##### レスポンス
+jsonデータを返します。フィールドは以下の通り。
 
 |フィールドの定義  |  フィールド名  |  フィールドタイプ  |  注釈|
 | --- | --- | --- | --- |
 |isValid   | 校正結果 |   bool  |  判定結果、リワードを支給するか。|
 例：
 
-```
+```json
 {
-"isValid": true
+ "isValid": true
 }
 ```
-#### 2.2.6 AdMobがCustomEvent Adapterの方法でリワード動画を統合する
-AdMobでリワード動画を統合するには二つの方法があります。一つはAdMob広告連盟で、もう一つはCustomEvent Adapterで統合する方法です。現在、JinriToutiaoは二つ目の方法をサポートしており、CustomEventを設定し、CustomEvent Adapterを実現する必要があります。[Rewarded Video Adapters](https://developers.google.com/admob/ios/rewarded-video-adapters?hl=zh-CN)公式サイトのガイドラインをご参照ください
 
-リワード動画のリクエスト方法は[Rewarded Video](https://developers.google.com/admob/ios/rewarded-video?hl=zh-CN)公式サイトのガイドラインをご参照ください
+<a name="admob"></a>
+#### PangleのAdmobメディエーション
 
-広告テストは[Test Ads](https://developers.google.com/admob/ios/test-ads?hl=zh-CN#enable_test_devices)をご参照ください
+PangleではAdmobメディエーション用のCustom Event Adapterを提供しています。そのAdapterを利用することで、AdmobメディエーションでPangleのリワード広告を利用することが可能になります。
 
 以下の点にご注意ください。
 
-+ **CustomEventを設定するときは、Class Nameと実現するAdapterクラス名を一致させる必要があります。一致していない場合はadapterの呼び出しができません。**
-+ **iOS simulatorはデフォルトではEnable test deviceタイプのデバイスに設定されており、Google Test Adsしか取得できず、JinriToutiaoのテスト広告は取得できません。JinriToutiaoの広告をテストしたい場合はiOSの実機を使用してください。追加してAdMob TestDevicesに追加しないでください。**
++ **Custom Eventを設定するときは、Class Nameと実現するAdapterクラス名を一致させる必要があります。一致していない場合はadapterの呼び出しができません。**
++ **iOS simulatorはデフォルトではEnable test deviceタイプのデバイスに設定されており、Google Test Adsしか取得できず、Pangleのテスト広告は取得できません。Pangleの広告をテストしたい場合はiOSの実機を使用し、AdMob TestDevicesに追加しないでください。**
 
 
-### 2.3 フルスクリーン動画(BUFullscreenVideoAd)
-+ **タイプの説明：**フルスクリーン動画はフルスクリーンで動画広告を展示する広告形式です。ユーザはシーン毎に対応する広告を入れることができます。この種の広告の長さは15～30秒で、スキップできます。また、endCard終了画面を表示し、ユーザに次の操作に移るよう誘導します。
+<a name="fullscreen"></a>
+### フルスクリーン動画(BUFullscreenVideoAd)
+フルスクリーン動画はフルスクリーンで動画広告を展示する広告形式です。この種の広告の長さは15～30秒で、スキップできます。また、エンドカード終了画面が表示され、ユーザに次の操作に移るよう誘導できます。
 
-#### 2.3.1 BUFullscreenVideoAdインターフェイスの説明
-**毎回、新しいBUFullscreenVideoAdオブジェクトを生成し、loadAdDataを呼び出す方法で、最新フルスクリーン動画をリクエストする必要があります。繰り返しローカルキャッシュを使用して、何度もフルスクリーン動画を展示することはやめてください。**
+<a name="fullscreen-if"></a>
+#### BUFullscreenVideoAdインターフェイスの説明
 
 ```Objective-C
 @interface BUFullscreenVideoAd : NSObject
@@ -425,7 +438,9 @@ Display video ad.
 
 @end
 ```
-#### 2.3.2 BUFullscreenVideoAdコールバックの説明
+
+<a name="fullscreen-callback"></a>
+#### BUFullscreenVideoAdコールバックの説明
 
 ```Objective-C
 @protocol BUFullscreenVideoAdDelegate <NSObject>
@@ -487,7 +502,11 @@ This method is called when the user clicked skip button.
 
 @end
 ```
-#### 2.3.3 インスタンス
+
+<a name="fullscreen-instance"></a>
+#### フルスクリーン動画のロード
+**毎回新たに`BUFullscreenVideoAd`オブジェクトを生成し、`loadAdData`を呼び出す方法で新しいフルスクリーン動画をリクエストする必要があります。動画を一度表示すると、そのオブジェクトを繰り返して使用しないようにご注意ください。**
+
 
 ```Objective-C
 - (void)viewDidLoad {
@@ -519,7 +538,10 @@ This method is called when the user clicked skip button.
 
 ```
 
+<a name="appendix"></a>
 ## 付録
+
+<a name="sdk-error"></a>
 ### SDKエラーコード
 データ取得における異常は主にコールバック方法で処理されます。
 
@@ -588,28 +610,26 @@ typedef NS_ENUM(NSInteger, BUErrorCode) {
 
 ```
 
+<a name="faq"></a>
 ### FAQ
 
 1.iOSの広告画面をappで開くと、閉じたり、戻ったりすることができません。
 
-答え：お使いのホームページViewControllerでNavigationBarを非表示にしている場合、戻ることができません。
+答え：お使いのrootViewControllerでNavigationBarを非表示にしている場合、戻ることができません。
 
-2.ToutiaoSDKのBUWebViewControllerクラスとBUUIWebViewクラスにメモリのリークがあります。
 
-答え：システムによる問題です。UIWebViewではリークが発生します。WKWebViewへの取り替えを検討しています。
+2.リワード動画を再生するとき、orientationは設定できますか。
 
-3.リワード動画を再生するとき、orientationは設定できますか。
+答え：orientationはsdkにより現在のスクリーンの状態を読み取ります。開発者による設定は不要です。
 
-答え：orientationはsdkにより現在のスクリーンの状態を読み取ります。開発者による設定は不要です。バックグラウンドが該当する広告のクリエイティブ（横向きクリエイティブ、縦向きクリエイティブ)をレスポンスします。
+3.userIdとは何ですか。
 
-4.userIdとは何ですか。
+答え：ゲームユーザーの識別し、主にリワードが有効となるかを判定する過程で、サーバからサーバへのコールバックされるパラメータで、ゲームがユーザを識別する唯一のものです。非サーバコールバックモードは動画再生終了後のコールバックにおいても、ゲームアプリケーションにパススルーされますが、この時、空の文字列がパススルーされます。
 
-答え：第三者のゲームのuser_idの認証アカウントで、主にリワードが有効となるかを判定する過程で、サーバからサーバへのコールバックパススルーされるパラメータで、ゲームがユーザを識別する唯一のものです。非サーバコールバックモードは動画再生終了後のコールバックにおいても、ゲームアプリケーションにパススルーされますが、この時、ヌルの文字列がパススルーされ、nilは送られません。
-
-5.iOSをまとめたパッケージのサイズはどれくらいですか？
+４.パッケージのサイズはどれくらいですか？
 
 答え：demoパッケージをもとに計算すると約580kです。しかし、具体的なサイズは導入した機能により異なりますので、実際のサイズはまとめた後のパッケージサイズに準じます。
 
-6.リワード動画とフルスクリーン動画における素材ロードのコールバック成功と広告動画におけるクリエイティブキャッシュのコールバック成功にはどのような違いがあるのでしょうか。
+５.リワード動画とフルスクリーン動画における素材ロードのコールバック成功と広告動画におけるクリエイティブキャッシュのコールバック成功にはどのような違いがあるのでしょうか。
 
 答え：素材ロードの成功とは広告素材のクリエイティブのロード完了を言い、広告を展示することができます。但し、動画はシングルスレッドでロードされるため、この時の動画データはキャッシュができていません。そのため、インターネットの接続状況が悪い中で動画類を再生する際は、リアルタイムでデータをロードするため、動画が止まることがあります。スムーズに再生するためには、広告動画のクリエイティブのキャッシュができる時に広告を展示されることをお勧めします。
