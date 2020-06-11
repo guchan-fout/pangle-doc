@@ -75,7 +75,7 @@ Pangle管理画面からダウンロードしたSDKのzipファイルを解凍�
 ![image](http://sf1-ttcdn-tos.pstatp.com/img/union-platform/f20b43b4fbed075820aa738ea1416bd4.png~0x0_q100.webp)
 
 
-<a name="manual-install"></a>
+<a name="xcode-setting"></a>
 ### Xcodeコンパイルオプションの設定
 
 <a name="ats"></a>
@@ -314,7 +314,7 @@ self.rewardedVideoAd.delegate = self;
 [self.rewardedVideoAd loadAdData];
 ```
 
-<a name="burewardedvideoad-model"></a>
+<a name="burewardedvideo-model"></a>
 #### BURewardedVideoModel
 
 ```Objective-C
