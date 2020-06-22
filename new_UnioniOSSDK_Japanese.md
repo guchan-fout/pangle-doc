@@ -384,7 +384,7 @@ Only used for dislikeButton in BUNativeAdRelatedView.h
 }
 ```
 
-<a name="nativead-adslot"></a>
+<a name="nativead-slot"></a>
 #### BUAdSlot
 
 オブジェクトを新規してロードする広告情報を設定します。必ず`BUNativeAd.loadNativeAd`を呼ぶ前に設定してください。
