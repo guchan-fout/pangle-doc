@@ -25,6 +25,9 @@
             - [FullScreen広告](#fullscreen-ad)
               - [FullScreen広告のロードと表示](#fullscreen-ad-load)
               - [FullScreen広告インターフェイスの説明](#fullscreen-ad-load)
+            - [Dislikeについて](#dislike)
+              - [Dislikeインターフェイスの説明](#dislike-if)
+              - [Native広告にDislikeを追加](#dislike-native)
     - [PangleのAdmobメディエーション](#admob)
     - [付録](#appendix)
         - [SDKエラーコード](#sdk-error)
@@ -869,6 +872,80 @@ public interface TTFullScreenVideoAd {
 ```
 
 
+<a name="dislike"></a>
+#### Dislikeについて
+SDKは、広告のDislike機能を開発者に提供します。ユーザーが広告を閉じると、ポップアップダイアログが表示され、オフにする理由をユーザーに尋ねます。その理由には、「興味がない」、「同じ広告を見たことがある」などがあります。
+
+**Dislikeを使用する場合は、TTAdNative mTTAdNative = ttAdManager.createAdNative（activity）を初期化するときに、paramをアクティビティに渡す必要があります。**
+
+<a name="dislike-if"></a>
+##### Dislikeインターフェイスの説明
+
+```Java
+public interface TTAdDislike {
+    /**
+     * Pop up Dislike Dialog
+     */
+    void showDislikeDialog();
+
+    /**
+     * Set Dislike Interaction Callback
+     */
+    void setDislikeInteractionCallback(DislikeInteractionCallback dislikeInteractionCallback);
+
+    /**
+     * Expose to the user and handle the result of dislike selection
+     */
+    interface DislikeInteractionCallback {
+
+        /**
+         * @param position  The chosen position
+         * @param value The chosen content
+         */
+        void onSelected(int position, String value);
+
+        /**
+         * Click cancel
+         */
+        void onCancel();
+    }
+}
+```
+
+<a name="dislike-native"></a>
+##### Native広告にDislikeを追加
+
+```Java
+// dislike view's image
+ImageView imgDislike = nativeView.findViewById(R.id.img_native_dislike);
+bindDislikeAction(nativeAd, imgDislike);
+.
+.
+.
+private void bindDislikeAction(TTNativeAd ad, View dislikeView) {
+    final TTAdDislike ttAdDislike = ad.getDislikeDialog(this);
+    if (ttAdDislike != null) {
+        ttAdDislike.setDislikeInteractionCallback(new TTAdDislike.DislikeInteractionCallback() {
+            @Override
+            public void onSelected(int position, String value) {
+                yourViewContainer.removeAllViews();
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
+    }
+    dislikeView.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (ttAdDislike != null)
+                ttAdDislike.showDislikeDialog();
+        }
+    });
+}
+```
 
 <a name="admob"></a>
 ### PangleのAdmobメディエーション

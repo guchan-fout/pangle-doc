@@ -476,7 +476,7 @@ BUMaterialMetaはコールバックされる広告のデータです。
 <a name="nativead-dislike"></a>
 #### BUDislike
 
-広告に関心ない時に原因を選択させるフィードバック機能を提供します。ユーザーが理由をを選んだら**必ず**` (void)didSelectedFilterWordWithReason:(BUDislikeWords *)filterWord`を呼んでください。
+SDKは、広告のdislike機能を開発者に提供します。ユーザーが広告を閉じると、ポップアップダイアログが表示され、オフにする理由をユーザーに尋ねます。その理由には、「興味がない」、「同じ広告を見たことがある」などがあります。ユーザーが理由をを選んだら**必ず**` (void)didSelectedFilterWordWithReason:(BUDislikeWords *)filterWord`を呼んでください。
 
 ```objective-c
 /**
