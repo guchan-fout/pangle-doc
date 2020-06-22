@@ -15,7 +15,14 @@
         - [SDKの初期化](#buadsdkmanager)
             - [BUAdSDKManagerでのSDK初期化](#buadsdkmanager-use)
             - [インターフェイスの説明](#buadsdkmanager-if)
-        - [リワード動画(BURewardedVideoAd)](#burewardedvideoad)
+        - [ネイティブ広告(BUNativeAd)](#nativead)
+            - [BUNativeAdインターフェイスの説明](#nativead-if)
+            - [BUNativeAdコールバックの説明](#nativead-callback)
+            - [BUNativeAdの初期化とロード](#nativead-instance)
+            - [BUAdSlot](#nativead-slot)
+            - [BUMaterialMeta](#nativead-meta)
+            - [Dislike](#nativead-dislike)
+        - [リワード動画広告(BURewardedVideoAd)](#burewardedvideoad)
             - [BURewardedVideoAdインターフェイスの説明](#burewardedvideoad-if)
             - [BURewardedVideoAdコールバックの説明](#burewardedvideoad-callback)
             - [リワード動画の初期化とロード](#burewardedvideoad-instance)
@@ -25,7 +32,7 @@
                 - [サイン作成方法](#sign)
                 - [レスポンス](#response)
             - [PangleのAdmobメディエーション](#admob)
-        - [フルスクリーン動画(BUFullscreenVideoAd)](#fullscreen)
+        - [フルスクリーン動画広告(BUFullscreenVideoAd)](#fullscreen)
             - [BUFullscreenVideoAdインターフェイスの説明](#fullscreen-if)
             - [BUFullscreenVideoAdコールバックの説明](#fullscreen-callback)
             - [フルスクリーン動画の初期化とロード](#fullscreen-instance)
@@ -196,6 +203,312 @@ Pangleの管理画面にAppIDとPlacementIDを作成してください。ご不�
 
 
 使用方法について更に詳しくお知りになりたい方は、[GitHub上のDemoプロジェクト](https://github.com/bytedance/Bytedance-UnionAD) をご参照ください。
+
+<a name="nativead"></a>
+### ネイティブ広告(BUNativeAd)]
+ネイティブ広告は、文字、画像と動画などを表示する広告形式です。
+
+<a name="nativead-if"></a>
+#### BUNativeAdインターフェイスの説明
+```Objective-C
+/**
+Abstract ad slot containing ad data loading, response callbacks.
+BUNativeAd currently supports native ads.
+Native ads include in-feed ad (multiple ads, image + video), general native ad (single ad, image + video), native banner ad, and native interstitial ad.
+Support interstitial ad, banner ad, splash ad, rewarded video ad, full-screen video ad.
+*/
+@interface BUNativeAd : NSObject
+​
+/**
+Ad slot description.
+*/
+@property (nonatomic, strong, readwrite, nullable) BUAdSlot *adslot;
+​
+/**
+Ad slot material.
+*/
+@property (nonatomic, strong, readonly, nullable) BUMaterialMeta *data;
+​
+/**
+The delegate for receiving state change messages.
+The delegate is not limited to viewcontroller.
+The delegate can be set to any object which conforming to <BUNativeAdDelegate>.
+*/
+@property (nonatomic, weak, readwrite, nullable) id<BUNativeAdDelegate> delegate;
+​
+/**
+required.
+Root view controller for handling ad actions.
+Action method includes 'pushViewController' and 'presentViewController'.
+*/
+@property (nonatomic, weak, readwrite) UIViewController *rootViewController;
+​
+/**
+Initializes native ad with ad slot.
+@param slot : ad slot description.
+including slotID,adType,adPosition,etc.
+@return BUNativeAd
+*/
+- (instancetype)initWithSlot:(BUAdSlot *)slot;
+​
+/**
+Register clickable views in native ads view.
+Interaction types can be configured on TikTok Audience Network.
+Interaction types include view video ad details page, make a call, send email, download the app, open the webpage using a browser,open the webpage within the app, etc.
+@param containerView : required.
+container view of the native ad.
+@param clickableViews : optional.
+Array of views that are clickable.
+*/
+- (void)registerContainer:(__kindof UIView *)containerView
+withClickableViews:(NSArray<__kindof UIView *> *_Nullable)clickableViews;
+​
+/**
+Unregister ad view from the native ad.
+*/
+- (void)unregisterView;
+​
+/**
+Actively request nativeAd datas.
+*/
+- (void)loadAdData;
+​
+@end
+```
+
+
+<a name="nativead-callback"></a>
+#### BUNativeAdコールバックの説明
+
+```Objective-c
+@protocol BUNativeAdDelegate <NSObject>
+​
+@optional
+​
+/**
+This method is called when native ad material loaded successfully.
+*/
+- (void)nativeAdDidLoad:(BUNativeAd *)nativeAd;
+​
+/**
+This method is called when native ad materia failed to load.
+@param error : the reason of error
+*/
+- (void)nativeAd:(BUNativeAd *)nativeAd didFailWithError:(NSError *_Nullable)error;
+​
+/**
+This method is called when native ad slot has been shown.
+*/
+- (void)nativeAdDidBecomeVisible:(BUNativeAd *)nativeAd;
+​
+/**
+This method is called when native ad is clicked.
+*/
+- (void)nativeAdDidClick:(BUNativeAd *)nativeAd withView:(UIView *_Nullable)view;
+​
+/**
+This method is called when the user clicked dislike reasons.
+Only used for dislikeButton in BUNativeAdRelatedView.h
+@param filterWords : reasons for dislike
+*/
+- (void)nativeAd:(BUNativeAd *)nativeAd dislikeWithReason:(NSArray<BUDislikeWords *> *)filterWords;
+@end
+```
+
+<a name="nativead-instance"></a>
+#### BUNativeAdの初期化とロード
+`BUNativeAd.loadNativeAd`を呼ぶことでネイティブ広告をロードします。ロードする広告の設定は
+[BUAdSlot](#nativead-adslot)のオブジェクトで設定してください。
+
+```Objective-c
+- (void)loadNativeAd {
+    BUNativeAd *nad = [BUNativeAd new];
+    BUAdSlot *slot1 = [[BUAdSlot alloc] init];
+    BUSize *imgSize1 = [[BUSize alloc] init];
+    imgSize1.width = 1080;
+    imgSize1.height = 1920;
+    slot1.ID = @"900480107";
+    slot1.AdType = BUAdSlotAdTypeFeed;
+    slot1.position = BUAdSlotPositionTop;
+    slot1.imgSize = imgSize1;
+    slot1.isSupportDeepLink = YES;
+    nad.adslot = slot1;
+​
+    nad.rootViewController = self;
+    nad.delegate = self;
+​
+    self.ad = nad;
+​
+    [nad loadAdData];
+}
+```
+
+`BUNativeAdDelegate`のコールバックで広告を表示します。
+
+```Objective-c
+- (void)nativeAdDidLoad:(BUNativeAd *)nativeAd {
+    self.infoLabel.text = nativeAd.data.AdTitle;
+    BUMaterialMeta *adMeta = nativeAd.data;
+    CGFloat contentWidth = CGRectGetWidth(_customview.frame) - 20;
+    BUImage *image = adMeta.imageAry.firstObject;
+    const CGFloat imageHeight = contentWidth * (image.height / image.width);
+    CGRect rect = CGRectMake(10, CGRectGetMaxY(_phoneButton.frame) + 5, contentWidth, imageHeight);
+​
+    if (adMeta.imageMode == BUFeedVideoAdModeImage) {
+        self.imageView.hidden = YES;
+        self.relatedView.videoAdView.hidden = NO;
+        self.relatedView.videoAdView.frame = rect;
+        [self.relatedView refeshData:nativeAd];
+    } else {
+        self.imageView.hidden = NO;
+        self.relatedView.videoAdView.hidden = YES;
+        if (adMeta.imageAry.count > 0) {
+            if (image.imageURL.length > 0) {
+                self.imageView.frame = rect;
+                [self.imageView setImageWithURL:[NSURL URLWithString:image.imageURL] placeholderImage:nil];
+            }
+        }
+    }
+​
+    // Register UIView with the native ad; the whole UIView will be clickable.
+    [nativeAd registerContainer:self.customview withClickableViews:@[self.infoLabel, self.phoneButton, self.downloadButton, self.urlButton]];
+}
+​
+- (void)nativeAd:(BUNativeAd *)nativeAd didFailWithError:(NSError *_Nullable)error {
+}
+​
+- (void)nativeAdDidClick:(BUNativeAd *)nativeAd withView:(UIView *)view {
+}
+​
+- (void)nativeAdDidBecomeVisible:(BUNativeAd *)nativeAd {
+}
+```
+
+<a name="nativead-adslot"></a>
+#### BUAdSlot
+
+オブジェクトを新規してロードする広告情報を設定します。必ず`BUNativeAd.loadNativeAd`を呼ぶ前に設定してください。
+
+```Objective-c
+@interface BUAdSlot : NSObject
+​
+/// required. The unique identifier of a native ad.
+@property (nonatomic, copy) NSString *ID;
+​
+/// required. Ad type.
+@property (nonatomic, assign) BUAdSlotAdType AdType;
+​
+/// required. Ad display location.
+@property (nonatomic, assign) BUAdSlotPosition position;
+​
+/// Accept a set of image sizes, please pass in the BUSize object.
+@property (nonatomic, strong) NSMutableArray<BUSize *> *imgSizeArray;
+​
+/// required. Image size.
+@property (nonatomic, strong) BUSize *imgSize;
+​
+/// Icon size.
+@property (nonatomic, strong) BUSize *iconSize;
+​
+/// Maximum length of the title.
+@property (nonatomic, assign) NSInteger titleLengthLimit;
+​
+/// Maximum length of description.
+@property (nonatomic, assign) NSInteger descLengthLimit;
+​
+/// Whether to support deeplink.
+@property (nonatomic, assign) BOOL isSupportDeepLink;
+​
+/// Native banner ads and native interstitial ads are set to 1, other ad types are 0, the default is 0.
+@property (nonatomic, assign) BOOL isOriginAd;
+​
+- (NSDictionary *)dictionaryValue;
+​
+@end
+```
+
+<a name="nativead-meta"></a>
+#### BUMaterialMeta
+BUMaterialMetaはコールバックされる広告のデータです。
+中身に広告表示用のデータが含まれています。
+
+
+```objective-c
+@interface BUMaterialMeta : NSObject <NSCoding>
+​
+/// interaction types supported by ads.
+@property (nonatomic, assign) BUInteractionType interactionType;
+​
+/// material pictures.
+@property (nonatomic, strong) NSArray<BUImage *> *imageAry;
+​
+/// ad logo icon.
+@property (nonatomic, strong) BUImage *icon;
+​
+/// ad headline.
+@property (nonatomic, copy) NSString *AdTitle;
+​
+/// ad description.
+@property (nonatomic, copy) NSString *AdDescription;
+​
+/// ad source.
+@property (nonatomic, copy) NSString *source;
+​
+/// text displayed on the creative button.
+@property (nonatomic, copy) NSString *buttonText;
+​
+/// display format of the in-feed ad, other ads ignores it.
+@property (nonatomic, assign) BUFeedADMode imageMode;
+​
+/// Star rating, range from 1 to 5.
+@property (nonatomic, assign) NSInteger score;
+​
+/// Number of comments.
+@property (nonatomic, assign) NSInteger commentNum;
+​
+/// ad installation package size, unit byte.
+@property (nonatomic, assign) NSInteger appSize;
+​
+/// media configuration parameters.
+@property (nonatomic, strong) NSDictionary *mediaExt;
+```
+
+<a name="nativead-dislike"></a>
+#### BUDislike
+
+広告に関心ない時に原因を選択させるフィードバック機能を提供します。ユーザーが理由をを選んだら**必ず**` (void)didSelectedFilterWordWithReason:(BUDislikeWords *)filterWord`を呼んでください。
+
+```objective-c
+/**
+!!! important :
+Please report to the sdk the user’s selection, inaccurate model will result in poor ad performance.
+*/
+@interface BUDislike : NSObject
+/**
+The array of BUDislikeWords which have reasons for dislike.
+The application can show the secondary page for dislike if '[filterWords.options count] > 0'.
+*/
+@property (nonatomic, copy, readonly) NSArray<BUDislikeWords *> *filterWords;
+
+/**
+Initialize with nativeAd to get filterWords.
+return BUDislike
+*/
+- (instancetype)initWithNativeAd:(BUNativeAd *)nativeAd;
+
+/**
+Call this method after the user chose dislike reasons.
+(Only for object which uses 'BUDislike.filterWords')
+@param filterWord : reasons for dislike
+@note : don't need to call this method if '[filterWords.options count] > 0'.
+@note :please dont't change 'BUDislike.filterWords'.
+'filterWord' must be one of 'BUDislike.filterWords', otherwise it will be filtered.
+*/
+- (void)didSelectedFilterWordWithReason:(BUDislikeWords *)filterWord;
+
+```
+
+
 
 
 <a name="burewardedvideoad"></a>
